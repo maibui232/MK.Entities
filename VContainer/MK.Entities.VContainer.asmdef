@@ -1,0 +1,9 @@
+{
+  "name": "MK.Entities.VContainer",
+  "rootNamespace": "MK.Entities.VContainer",
+  "references": [
+    "VContainer",
+    "MK.Entities.Runtime",
+    "MK.Extensions"
+  ]
+}

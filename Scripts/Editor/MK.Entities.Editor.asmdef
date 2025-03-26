@@ -1,0 +1,10 @@
+{
+  "name": "MK.Entities.Editor",
+  "rootNamespace": "MK.Entities.Editor",
+  "includePlatforms": [
+    "Editor"
+  ],
+  "references": [
+    "MK.Entities.Runtime"
+  ]
+}
