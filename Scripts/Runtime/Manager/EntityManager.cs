@@ -1,4 +1,4 @@
-namespace MK.Entities.Runtime
+namespace MK.Entities
 {
     using System;
     using System.Collections.Generic;
@@ -14,7 +14,8 @@ namespace MK.Entities.Runtime
         public Entity CreateEntity()
         {
             var index  = this.entities.Count;
-            var entity = new Entity(index, $"Entity-{index}");
+            var entity = new Entity();
+            entity.OnCreate(index, $"Entity-{index}");
             this.entities.Add(entity);
 
             return entity;

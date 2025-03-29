@@ -1,4 +1,4 @@
-namespace MK.Entities.Runtime
+namespace MK.Entities
 {
     using System;
     using System.Collections.Generic;
@@ -7,13 +7,18 @@ namespace MK.Entities.Runtime
     {
         private readonly Dictionary<Type, IComponent> typeToComponents = new();
 
-        internal int    Index { get; }
-        internal string Name  { get; }
+        internal int    Index { get; private set; }
+        internal string Name  { get; private set; }
 
-        public Entity(int index, string name)
+        public void OnCreate(int index, string name)
         {
             this.Index = index;
             this.Name  = name;
+        }
+
+        internal void OnCleanup()
+        {
+            this.typeToComponents.Clear();
         }
 
         internal bool HasComponent(Type type)

@@ -1,4 +1,4 @@
-namespace MK.Entities.Runtime.MK.Entities.Runtime.Variable
+namespace MK.Entities.MK.Entities.Variable
 {
     public class VarRO<T>
     {

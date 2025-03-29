@@ -1,7 +1,7 @@
 namespace MK.Entities.VContainer
 {
+    using global::MK.Extensions;
     using global::VContainer;
-    using MK.Extensions;
 
     public static class EntitiesVContainer
     {

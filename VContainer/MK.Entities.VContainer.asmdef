@@ -4,6 +4,7 @@
   "references": [
     "VContainer",
     "MK.Entities.Runtime",
-    "MK.Extensions"
+    "MK.Extensions",
+    "MK.Entities"
   ]
 }

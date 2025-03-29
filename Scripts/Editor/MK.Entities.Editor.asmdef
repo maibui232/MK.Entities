@@ -5,6 +5,6 @@
     "Editor"
   ],
   "references": [
-    "MK.Entities.Runtime"
+    "MK.Entities"
   ]
 }

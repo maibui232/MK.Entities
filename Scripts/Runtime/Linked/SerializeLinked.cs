@@ -1,4 +1,4 @@
-namespace MK.Entities.Runtime
+namespace MK.Entities
 {
     public abstract class SerializeLinked<TComponent> : Linked<TComponent>, ISerializeLinked where TComponent : IComponent
     {

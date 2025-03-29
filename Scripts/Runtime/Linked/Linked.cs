@@ -1,4 +1,4 @@
-namespace MK.Entities.Runtime
+namespace MK.Entities
 {
     using System;
     using UnityEngine;
