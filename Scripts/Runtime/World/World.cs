@@ -11,7 +11,7 @@ namespace MK.Entities
         private World(ISystemProvider systemProvider)
         {
             this.systemProvider = systemProvider;
-            this.EntityManager  = new EntityManager();
+            this.EntityManager  = new EntityManager(new EntityFactory());
         }
 
         public static World NewWorld(ISystemProvider systemProvider)

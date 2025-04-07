@@ -1,4 +1,5 @@
 {
   "name": "MK.Entities",
-  "rootNamespace": "MK.Entities"
+  "rootNamespace": "MK.Entities",
+  "references":[ "GUID:c5bc669874a343bb8f373b00e95b052e" ]
 }

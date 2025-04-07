@@ -2,19 +2,27 @@ namespace MK.Entities
 {
     using System;
     using System.Collections.Generic;
+    using global::MK.Factory;
     using UnityEngine;
 
     public class EntityManager
     {
+        private readonly IFactory<Entity> entityFactory;
+
         private readonly HashSet<Entity>                entities              = new();
         private readonly EntityCommandBuffer            ecb                   = new();
         private readonly List<ICollector>               collectors            = new();
         private readonly Dictionary<GameObject, Entity> gameObjToLinkedEntity = new();
 
+        public EntityManager(IFactory<Entity> entityFactory)
+        {
+            this.entityFactory = entityFactory;
+        }
+
         public Entity CreateEntity()
         {
             var index  = this.entities.Count;
-            var entity = new Entity();
+            var entity = this.entityFactory.Instantiate();
             entity.OnCreate(index, $"Entity-{index}");
             this.entities.Add(entity);
 
