@@ -9,6 +9,9 @@ namespace MK.Entities
         private readonly List<Entity> spawnedEntities = new();
         private readonly List<Entity> cachedEntities  = new();
 
+        IEnumerable<Entity> IFactory<Entity>.GetSpawned => this.spawnedEntities;
+        IEnumerable<Entity> IFactory<Entity>.GetCached => this.cachedEntities;
+
         Entity IFactory<Entity>.Instantiate()
         {
             Entity entity;
@@ -35,6 +38,12 @@ namespace MK.Entities
             }
 
             this.cachedEntities.Add(instance);
+        }
+
+        void IFactory<Entity>.CleanUp()
+        {
+            this.spawnedEntities.Clear();
+            this.cachedEntities.Clear();
         }
     }
 }

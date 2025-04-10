@@ -1,8 +1,11 @@
 namespace MK.Entities
 {
+    using UnityEngine;
+
     public interface ILinked
     {
-        internal IComponent Component { get; set; }
+        internal GameObject LinkedObject { get; }
+        internal IComponent Component    { get; set; }
 
         void OnLinked(IComponent component);
 

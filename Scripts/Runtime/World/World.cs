@@ -12,6 +12,9 @@ namespace MK.Entities
         {
             this.systemProvider = systemProvider;
             this.EntityManager  = new EntityManager(new EntityFactory());
+#if UNITY_EDITOR
+            WorldDiagnostics.AddWorld(this);
+#endif
         }
 
         public static World NewWorld(ISystemProvider systemProvider)
@@ -58,6 +61,9 @@ namespace MK.Entities
             {
                 system.OnCleanUp(this);
             }
+#if UNITY_EDITOR
+            WorldDiagnostics.AddWorld(this);
+#endif
         }
     }
 }

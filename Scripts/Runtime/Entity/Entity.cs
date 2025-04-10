@@ -10,13 +10,15 @@ namespace MK.Entities
         internal int    Index { get; private set; }
         internal string Name  { get; private set; }
 
-        public void OnCreate(int index, string name)
+        internal IEnumerable<IComponent> Components => this.typeToComponents.Values;
+
+        internal void OnCreate(int index, string name)
         {
             this.Index = index;
             this.Name  = name;
         }
 
-        internal void OnCleanup()
+        internal void OnDestroy()
         {
             this.typeToComponents.Clear();
         }

@@ -19,13 +19,18 @@ namespace MK.Entities
             var links = this.gameObject.GetComponents<ILinked>();
             foreach (var link in links)
             {
-                var linkType      = link.GetType();
-                var componentType = linkType.BaseType?.GetGenericArguments()[0];
+                var  linkType = link.GetType();
+                Type componentType;
 
                 if (link is ISerializeLinked serializeLinked)
                 {
                     var newComponent = serializeLinked.CreateComponent();
                     this.entity.AddComponent(newComponent);
+                    componentType = newComponent.GetType();
+                }
+                else
+                {
+                    componentType = linkType.BaseType?.GetGenericArguments()[0];
                 }
 
                 if (!this.entity.HasComponent(componentType))

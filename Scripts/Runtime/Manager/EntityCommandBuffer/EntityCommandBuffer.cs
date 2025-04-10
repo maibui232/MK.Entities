@@ -8,6 +8,14 @@ namespace MK.Entities
     {
         private readonly List<ICommandBuffer> commandBuffers = new();
 
+        public ICommandBuffer DestroyEntity(Entity entity, Action<Entity> onDestroyEntity)
+        {
+            var command = new DestroyCommandBuffer(entity, onDestroyEntity);
+            this.commandBuffers.Add(command);
+
+            return command;
+        }
+
         internal ICommandBuffer AddComponent(Entity entity, IComponent component)
         {
             var command = new AddCommandBuffer(entity, component);
@@ -66,9 +74,6 @@ namespace MK.Entities
             this.commandBuffers.Clear();
         }
 
-        void IDisposable.Dispose()
-        {
-            this.commandBuffers.Clear();
-        }
+        void IDisposable.Dispose() { this.commandBuffers.Clear(); }
     }
 }

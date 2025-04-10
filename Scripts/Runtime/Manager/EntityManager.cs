@@ -2,30 +2,28 @@ namespace MK.Entities
 {
     using System;
     using System.Collections.Generic;
-    using global::MK.Factory;
+    using System.Linq;
+    using MK.Factory;
     using UnityEngine;
 
     public class EntityManager
     {
         private readonly IFactory<Entity> entityFactory;
 
-        private readonly HashSet<Entity>                entities              = new();
         private readonly EntityCommandBuffer            ecb                   = new();
         private readonly List<ICollector>               collectors            = new();
         private readonly Dictionary<GameObject, Entity> gameObjToLinkedEntity = new();
 
-        public EntityManager(IFactory<Entity> entityFactory)
-        {
-            this.entityFactory = entityFactory;
-        }
+        public EntityManager(IFactory<Entity> entityFactory) { this.entityFactory = entityFactory; }
 
         public Entity CreateEntity()
         {
-            var index  = this.entities.Count;
+            var index  = this.entityFactory.GetSpawned.Count();
             var entity = this.entityFactory.Instantiate();
             entity.OnCreate(index, $"Entity-{index}");
-            this.entities.Add(entity);
-
+#if UNITY_EDITOR
+            WorldDiagnostics.EntityToDiagnostics.Add(entity, new EntityDiagnostics(entity));      
+#endif
             return entity;
         }
 
@@ -36,7 +34,7 @@ namespace MK.Entities
             this.ecb.Playback();
             foreach (var collector in this.collectors)
             {
-                collector.Collect(this.entities);
+                collector.Collect(this.entityFactory.GetSpawned);
             }
         }
 
@@ -89,6 +87,26 @@ namespace MK.Entities
         public void RemoveComponent<TComponent>(Entity entity) where TComponent : IComponent
         {
             this.ecb.RemoveComponent<TComponent>(entity);
+        }
+
+        public void DestroyEntity(Entity entity)
+        {
+            this.ecb.DestroyEntity(entity, OnDestroy);
+            return;
+
+            void OnDestroy(Entity e)
+            {
+                if (this.gameObjToLinkedEntity.ContainsValue(e))
+                {
+                    var obj = this.gameObjToLinkedEntity.First(pair => pair.Value.Equals(e)).Key;
+                    this.Unlink(obj);
+                }
+
+                this.entityFactory.Destruct(e);
+#if UNITY_EDITOR
+                WorldDiagnostics.EntityToDiagnostics.Remove(entity);      
+#endif
+            }
         }
 
 #endregion

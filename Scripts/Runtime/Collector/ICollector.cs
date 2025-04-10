@@ -4,6 +4,6 @@ namespace MK.Entities
 
     public interface ICollector
     {
-        internal void Collect(IReadOnlyCollection<Entity> entities);
+        internal void Collect(IEnumerable<Entity> entities);
     }
 }

@@ -8,14 +8,14 @@ namespace MK.Entities
     {
         protected Entity[] Entities { get; private set; }
 
-        protected readonly Type[] ComponentTypes;
+        private readonly Type[] ComponentTypes;
 
-        protected Collector()
+        internal Collector()
         {
             this.ComponentTypes = this.GetType().GetGenericArguments();
         }
 
-        void ICollector.Collect(IReadOnlyCollection<Entity> entities)
+        void ICollector.Collect(IEnumerable<Entity> entities)
         {
             this.Entities = entities.Where(entity => this.ComponentTypes.All(entity.HasComponent)).ToArray();
             this.OnCollect();

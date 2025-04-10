@@ -5,9 +5,12 @@ namespace MK.Entities
 
     public abstract class Linked<TComponent> : MonoBehaviour, ILinked where TComponent : IComponent
     {
-        private bool isLinked;
+        private bool       isLinked;
+        private GameObject linkedObject;
 
-        IComponent ILinked.Component { get; set; }
+        GameObject ILinked.LinkedObject => this.linkedObject;
+
+        IComponent ILinked.Component    { get; set; }
 
         void ILinked.OnLinked(IComponent component)
         {
