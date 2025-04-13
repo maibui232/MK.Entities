@@ -56,9 +56,9 @@ namespace MK.Entities
             return command;
         }
 
-        internal ICommandBuffer Unlink(Entity entity, GameObject gameObject)
+        internal ICommandBuffer Unlink(GameObject gameObject)
         {
-            var command = new UnlinkCommandBuffer(entity, gameObject);
+            var command = new UnlinkCommandBuffer(gameObject);
             this.commandBuffers.Add(command);
 
             return command;

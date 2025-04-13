@@ -16,6 +16,6 @@ namespace MK.Entities
             return component;
         }
 
-        public abstract TComponent CreateComponent();
+        protected abstract TComponent CreateComponent();
     }
 }

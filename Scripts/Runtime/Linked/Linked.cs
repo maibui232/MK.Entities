@@ -8,9 +8,8 @@ namespace MK.Entities
         private bool       isLinked;
         private GameObject linkedObject;
 
-        GameObject ILinked.LinkedObject => this.linkedObject;
-
-        IComponent ILinked.Component    { get; set; }
+        IComponent ILinked.Component { get; set; }
+        bool ILinked.      IsLinked  => this.isLinked;
 
         void ILinked.OnLinked(IComponent component)
         {
@@ -34,8 +33,8 @@ namespace MK.Entities
             this.OnUnlinked((TComponent)component);
         }
 
-        public abstract void OnLinked(TComponent component);
+        protected abstract void OnLinked(TComponent component);
 
-        public abstract void OnUnlinked(TComponent component);
+        protected abstract void OnUnlinked(TComponent component);
     }
 }

@@ -1,6 +1,7 @@
 namespace MK.Entities
 {
     using System;
+    using System.Linq;
     using UnityEngine;
 
     public class LinkCommandBuffer : ICommandBuffer
@@ -17,7 +18,7 @@ namespace MK.Entities
         public void Execute()
         {
             var links = this.gameObject.GetComponents<ILinked>();
-            foreach (var link in links)
+            foreach (var link in links.Where(link => !link.IsLinked))
             {
                 var  linkType = link.GetType();
                 Type componentType;
@@ -35,7 +36,7 @@ namespace MK.Entities
 
                 if (!this.entity.HasComponent(componentType))
                 {
-                    throw new ArgumentException($"Entity-{this.entity.Name} could not be found component {componentType?.FullName}");
+                    throw new ArgumentException($"{this.entity.Name} could not be found component {componentType?.FullName}");
                 }
 
                 link.OnLinked(this.entity.GetComponent(componentType));

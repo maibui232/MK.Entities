@@ -1,0 +1,108 @@
+.root {
+    flex-grow: 1;
+    margin: 5px;
+}
+
+.header {
+    -unity-font-style: bold;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+
+.sub-header {
+    -unity-font-style: bold;
+    font-size: 14px;
+    margin: 5px 0;
+    color: rgb(200, 200, 200);
+}
+
+.help-box {
+    margin: 5px;
+    padding: 5px;
+    background-color: rgb(50, 50, 50);
+    border-radius: 3px;
+}
+
+.split-view {
+    flex-grow: 1;
+    min-height: 200px;
+}
+
+.pane {
+    padding: 5px;
+}
+
+#entityListView {
+    flex-grow: 1;
+    margin: 5px;
+}
+
+#entityListView Button {
+    padding: 4px 8px;
+    margin: 2px 0;
+    border-radius: 3px;
+    transition: background-color 0.1s ease-out;
+    text-align: left;
+    width: 100%;
+}
+
+#entityListView Button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+#entityListView Button.selected {
+    background-color: #0078d7;
+    color: white;
+    border-left: 3px solid #005a9e;
+}
+
+#componentsPanel {
+    flex-grow: 1;
+    margin: 5px;
+    padding: 10px;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: 3px;
+}
+
+#noWorldsLabel,
+#noEntitySelectedLabel {
+    color: #666;
+    font-style: italic;
+    padding: 10px;
+    text-align: center;
+}
+
+.field-container,
+.property-container {
+    flex-direction: row;
+    margin: 2px 0;
+    padding: 2px 5px;
+    background-color: rgb(40, 40, 40);
+    border-radius: 2px;
+}
+
+.field-label,
+.property-label {
+    min-width: 150px;
+    color: rgb(200, 200, 200);
+}
+
+.field-value,
+.property-value {
+    color: rgb(180, 180, 180);
+}
+
+.error-label {
+    color: rgb(255, 100, 100);
+}
+
+.unity-foldout {
+    margin: 5px 0;
+}
+
+.unity-foldout__content {
+    margin-left: 15px;
+    padding: 5px;
+    background-color: rgb(30, 30, 30);
+    border-radius: 2px;
+} 

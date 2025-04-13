@@ -13,7 +13,7 @@ namespace MK.Entities
             this.systemProvider = systemProvider;
             this.EntityManager  = new EntityManager(new EntityFactory());
 #if UNITY_EDITOR
-            WorldDiagnostics.AddWorld(this);
+            WorldDiagnostic.AddWorld(this);                  
 #endif
         }
 
@@ -62,7 +62,7 @@ namespace MK.Entities
                 system.OnCleanUp(this);
             }
 #if UNITY_EDITOR
-            WorldDiagnostics.AddWorld(this);
+            WorldDiagnostic.RemoveWorld(this);                  
 #endif
         }
     }

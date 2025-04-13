@@ -8,11 +8,9 @@ namespace MK.Entities
 
     public class EntityManager
     {
-        private readonly IFactory<Entity> entityFactory;
-
-        private readonly EntityCommandBuffer            ecb                   = new();
-        private readonly List<ICollector>               collectors            = new();
-        private readonly Dictionary<GameObject, Entity> gameObjToLinkedEntity = new();
+        private readonly IFactory<Entity>    entityFactory;
+        private readonly EntityCommandBuffer ecb        = new();
+        private readonly List<ICollector>    collectors = new();
 
         public EntityManager(IFactory<Entity> entityFactory) { this.entityFactory = entityFactory; }
 
@@ -21,9 +19,7 @@ namespace MK.Entities
             var index  = this.entityFactory.GetSpawned.Count();
             var entity = this.entityFactory.Instantiate();
             entity.OnCreate(index, $"Entity-{index}");
-#if UNITY_EDITOR
-            WorldDiagnostics.EntityToDiagnostics.Add(entity, new EntityDiagnostics(entity));      
-#endif
+
             return entity;
         }
 
@@ -40,74 +36,25 @@ namespace MK.Entities
 
         public void Link(Entity entity, GameObject obj)
         {
-            if (this.gameObjToLinkedEntity.ContainsKey(obj))
-            {
-                return;
-            }
-
             this.ecb.Link(entity, obj);
-            this.gameObjToLinkedEntity.Add(obj, entity);
         }
 
         public void Unlink(GameObject obj)
         {
-            if (!this.gameObjToLinkedEntity.Remove(obj, out var entity))
-            {
-                return;
-            }
-
-            this.ecb.Unlink(entity, obj);
+            this.ecb.Unlink(obj);
         }
 
-        public void AddComponent(Entity entity, IComponent component)
-        {
-            this.ecb.AddComponent(entity, component);
-        }
+        public void AddComponent(Entity entity, IComponent component) { this.ecb.AddComponent(entity, component); }
 
-        public void AddComponent<TComponent>(Entity entity, TComponent component) where TComponent : IComponent
-        {
-            this.ecb.AddComponent(entity, component);
-        }
+        public void AddComponent<TComponent>(Entity entity, TComponent component) where TComponent : IComponent { this.ecb.AddComponent(entity, component); }
 
-        public void SetComponent(Entity entity, IComponent component)
-        {
-            this.ecb.SetComponent(entity, component);
-        }
+        public void SetComponent(Entity entity, IComponent component) { this.ecb.SetComponent(entity, component); }
 
-        public void SetComponent<TComponent>(Entity entity, TComponent component) where TComponent : IComponent
-        {
-            this.ecb.SetComponent(entity, component);
-        }
+        public void SetComponent<TComponent>(Entity entity, TComponent component) where TComponent : IComponent { this.ecb.SetComponent(entity, component); }
 
-        public void RemoveComponent(Entity entity, Type type)
-        {
-            this.ecb.RemoveComponent(entity, type);
-        }
+        public void RemoveComponent(Entity entity, Type type) { this.ecb.RemoveComponent(entity, type); }
 
-        public void RemoveComponent<TComponent>(Entity entity) where TComponent : IComponent
-        {
-            this.ecb.RemoveComponent<TComponent>(entity);
-        }
-
-        public void DestroyEntity(Entity entity)
-        {
-            this.ecb.DestroyEntity(entity, OnDestroy);
-            return;
-
-            void OnDestroy(Entity e)
-            {
-                if (this.gameObjToLinkedEntity.ContainsValue(e))
-                {
-                    var obj = this.gameObjToLinkedEntity.First(pair => pair.Value.Equals(e)).Key;
-                    this.Unlink(obj);
-                }
-
-                this.entityFactory.Destruct(e);
-#if UNITY_EDITOR
-                WorldDiagnostics.EntityToDiagnostics.Remove(entity);      
-#endif
-            }
-        }
+        public void RemoveComponent<TComponent>(Entity entity) where TComponent : IComponent { this.ecb.RemoveComponent<TComponent>(entity); }
 
 #endregion
 
