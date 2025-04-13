@@ -3,7 +3,7 @@ namespace MK.Entities
     using System;
     using UnityEngine;
 
-    public abstract class Linked<TComponent> : MonoBehaviour, ILinked where TComponent : IComponent
+    public abstract class Linked<TComponent> : MonoBehaviour, ILinked where TComponent : struct, IComponent
     {
         private bool       isLinked;
         private GameObject linkedObject;
