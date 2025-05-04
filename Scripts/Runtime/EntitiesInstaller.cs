@@ -4,7 +4,7 @@ namespace MK.Entities
 
     public static class EntitiesInstaller
     {
-        public static void InstallEntities(IBuilder builder)
+        public static void InstallEntities(this IBuilder builder)
         {
             builder.Register<SystemProvider>(Lifetime.Singleton).AsSelf().AsImplementedInterfaces();
         }
