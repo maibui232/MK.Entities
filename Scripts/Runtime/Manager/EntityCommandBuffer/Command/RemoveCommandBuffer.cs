@@ -2,7 +2,7 @@ namespace MK.Entities
 {
     using System;
 
-    public class RemoveCommandBuffer : ICommandBuffer
+    internal sealed class RemoveCommandBuffer : ICommandBuffer
     {
         private readonly Entity entity;
         private readonly Type   type;

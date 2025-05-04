@@ -4,7 +4,7 @@ namespace MK.Entities
     using System.Linq;
     using UnityEngine;
 
-    public class LinkCommandBuffer : ICommandBuffer
+    internal sealed class LinkCommandBuffer : ICommandBuffer
     {
         private readonly Entity     entity;
         private readonly GameObject gameObject;

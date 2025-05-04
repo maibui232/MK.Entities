@@ -3,7 +3,7 @@ namespace MK.Entities
     using System.Linq;
     using UnityEngine;
 
-    public class UnlinkCommandBuffer : ICommandBuffer
+    internal sealed class UnlinkCommandBuffer : ICommandBuffer
     {
         private readonly Entity     entity;
         private readonly GameObject gameObject;

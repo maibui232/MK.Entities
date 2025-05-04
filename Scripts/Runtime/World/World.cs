@@ -3,7 +3,7 @@ namespace MK.Entities
     using System;
     using System.Collections.Generic;
 
-    public class World
+    public sealed class World
     {
         private readonly Dictionary<Type, ISystem> typeToSystem = new();
         private readonly ISystemProvider           systemProvider;

@@ -4,7 +4,7 @@ namespace MK.Entities
     using System.Collections.Generic;
     using global::MK.Factory;
 
-    public class EntityFactory : IFactory<Entity>
+    internal sealed class EntityFactory : IFactory<Entity>
     {
         private readonly List<Entity> spawnedEntities = new();
         private readonly List<Entity> cachedEntities  = new();

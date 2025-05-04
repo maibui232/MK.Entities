@@ -2,7 +2,7 @@ namespace MK.Entities
 {
     using System;
 
-    public class DestroyCommandBuffer : ICommandBuffer
+    internal sealed class DestroyCommandBuffer : ICommandBuffer
     {
         private readonly Entity         entity;
         private readonly Action<Entity> onDestroyEntity;

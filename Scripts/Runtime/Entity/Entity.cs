@@ -3,7 +3,7 @@ namespace MK.Entities
     using System;
     using System.Collections.Generic;
 
-    public class Entity
+    public sealed class Entity
     {
         private readonly Dictionary<Type, IComponent> typeToComponents = new();
 

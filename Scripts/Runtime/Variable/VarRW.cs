@@ -4,7 +4,9 @@ namespace MK.Entities
 
     public class VarRW<T> : VarRO<T>
     {
-        public VarRW(T value) : base(value) { }
+        public VarRW(T value) : base(value)
+        {
+        }
 
         public event Action<T> OnChange;
 
@@ -19,10 +21,19 @@ namespace MK.Entities
             this.OnChange?.Invoke(this.value);
         }
 
-        public static implicit operator T(VarRW<T> v) { return v.value; }
+        public static implicit operator T(VarRW<T> v)
+        {
+            return v.value;
+        }
 
-        public static implicit operator VarRW<T>(T v) { return new VarRW<T>(v); }
+        public static implicit operator VarRW<T>(T v)
+        {
+            return new VarRW<T>(v);
+        }
 
-        public override string ToString() { return this.value.ToString(); }
+        public override string ToString()
+        {
+            return this.value.ToString();
+        }
     }
 }

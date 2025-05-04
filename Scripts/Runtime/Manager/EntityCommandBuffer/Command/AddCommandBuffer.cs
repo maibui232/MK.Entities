@@ -1,6 +1,6 @@
 namespace MK.Entities
 {
-    public class AddCommandBuffer : ICommandBuffer
+    internal sealed class AddCommandBuffer : ICommandBuffer
     {
         private readonly Entity     entity;
         private readonly IComponent component;

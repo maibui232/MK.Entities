@@ -6,13 +6,16 @@ namespace MK.Entities
     using MK.Factory;
     using UnityEngine;
 
-    public class EntityManager
+    public sealed class EntityManager
     {
         private readonly IFactory<Entity>    entityFactory;
         private readonly EntityCommandBuffer ecb        = new();
         private readonly List<ICollector>    collectors = new();
 
-        public EntityManager(IFactory<Entity> entityFactory) { this.entityFactory = entityFactory; }
+        public EntityManager(IFactory<Entity> entityFactory)
+        {
+            this.entityFactory = entityFactory;
+        }
 
         public Entity CreateEntity()
         {
@@ -44,17 +47,35 @@ namespace MK.Entities
             this.ecb.Unlink(obj);
         }
 
-        public void AddComponent(Entity entity, IComponent component) { this.ecb.AddComponent(entity, component); }
+        public void AddComponent(Entity entity, IComponent component)
+        {
+            this.ecb.AddComponent(entity, component);
+        }
 
-        public void AddComponent<TComponent>(Entity entity, TComponent component) where TComponent : IComponent { this.ecb.AddComponent(entity, component); }
+        public void AddComponent<TComponent>(Entity entity, TComponent component) where TComponent : IComponent
+        {
+            this.ecb.AddComponent(entity, component);
+        }
 
-        public void SetComponent(Entity entity, IComponent component) { this.ecb.SetComponent(entity, component); }
+        public void SetComponent(Entity entity, IComponent component)
+        {
+            this.ecb.SetComponent(entity, component);
+        }
 
-        public void SetComponent<TComponent>(Entity entity, TComponent component) where TComponent : IComponent { this.ecb.SetComponent(entity, component); }
+        public void SetComponent<TComponent>(Entity entity, TComponent component) where TComponent : IComponent
+        {
+            this.ecb.SetComponent(entity, component);
+        }
 
-        public void RemoveComponent(Entity entity, Type type) { this.ecb.RemoveComponent(entity, type); }
+        public void RemoveComponent(Entity entity, Type type)
+        {
+            this.ecb.RemoveComponent(entity, type);
+        }
 
-        public void RemoveComponent<TComponent>(Entity entity) where TComponent : IComponent { this.ecb.RemoveComponent<TComponent>(entity); }
+        public void RemoveComponent<TComponent>(Entity entity) where TComponent : IComponent
+        {
+            this.ecb.RemoveComponent<TComponent>(entity);
+        }
 
 #endregion
 

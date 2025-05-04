@@ -11,10 +11,19 @@ namespace MK.Entities
             this.value = value;
         }
 
-        public static implicit operator T(VarRO<T> v) { return v.value; }
+        public static implicit operator T(VarRO<T> v)
+        {
+            return v.value;
+        }
 
-        public static implicit operator VarRO<T>(T v) { return new VarRO<T>(v); }
+        public static implicit operator VarRO<T>(T v)
+        {
+            return new VarRO<T>(v);
+        }
 
-        public override string ToString() { return this.value.ToString(); }
+        public override string ToString()
+        {
+            return this.value.ToString();
+        }
     }
 }
