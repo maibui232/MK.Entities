@@ -1,6 +1,6 @@
 namespace MK.Entities
 {
-    using MK.DependencyInjection;
+    using MK.Kernel;
 
     internal sealed class SystemProvider : ISystemProvider
     {
