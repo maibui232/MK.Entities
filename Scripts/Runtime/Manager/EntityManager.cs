@@ -3,24 +3,24 @@ namespace MK.Entities
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using MK.Factory;
+    using MK.Pool;
     using UnityEngine;
 
     public sealed class EntityManager
     {
-        private readonly IFactory<Entity>    entityFactory;
-        private readonly EntityCommandBuffer ecb        = new();
-        private readonly List<ICollector>    collectors = new();
+        private readonly IPoolableController<Entity> entityPoolableController;
+        private readonly EntityCommandBuffer         ecb        = new();
+        private readonly List<ICollector>            collectors = new();
 
-        public EntityManager(IFactory<Entity> entityFactory)
+        public EntityManager(IPoolableController<Entity> entityPoolableController)
         {
-            this.entityFactory = entityFactory;
+            this.entityPoolableController = entityPoolableController;
         }
 
         public Entity CreateEntity()
         {
-            var index  = this.entityFactory.GetSpawned.Count();
-            var entity = this.entityFactory.Instantiate();
+            var index  = this.entityPoolableController.GetSpawned.Count();
+            var entity = this.entityPoolableController.Instantiate();
             entity.OnCreate(index, $"Entity-{index}");
 
             return entity;
@@ -33,7 +33,7 @@ namespace MK.Entities
             this.ecb.Playback();
             foreach (var collector in this.collectors)
             {
-                collector.Collect(this.entityFactory.GetSpawned);
+                collector.Collect(this.entityPoolableController.GetSpawned);
             }
         }
 

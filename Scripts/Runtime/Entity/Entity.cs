@@ -2,8 +2,9 @@ namespace MK.Entities
 {
     using System;
     using System.Collections.Generic;
+    using MK.Pool;
 
-    public sealed class Entity
+    public sealed class Entity : IPoolable
     {
         private readonly Dictionary<Type, IComponent> typeToComponents = new();
 
@@ -78,6 +79,17 @@ namespace MK.Entities
         internal void RemoveComponent(Type type)
         {
             this.typeToComponents.Remove(type);
+        }
+
+        void IPoolable.OnSpawn()
+        {
+        }
+
+        void IPoolable.OnRecycle()
+        {
+            this.typeToComponents.Clear();
+            this.Index = -1;
+            this.Name  = null;
         }
     }
 }

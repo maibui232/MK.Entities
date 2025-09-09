@@ -3,6 +3,7 @@
   "rootNamespace": "MK.Entities",
   "references": [
     "MK.Factory",
-    "MK.Kernel"
+    "MK.Kernel",
+    "MK.Pool"
   ]
 }

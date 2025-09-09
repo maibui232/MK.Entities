@@ -4,6 +4,7 @@ namespace MK.Entities
     using System.Collections.Generic;
     using System.Reflection;
     using UnityEngine;
+    using Object = UnityEngine.Object;
 
     public sealed class World
     {
@@ -15,7 +16,7 @@ namespace MK.Entities
         private World(ISystemProvider systemProvider, string worldName = "World", bool autoUpdate = true)
         {
             this.systemProvider = systemProvider;
-            this.EntityManager  = new EntityManager(new EntityFactory());
+            this.EntityManager  = new EntityManager(new EntityPoolableController());
             
             foreach (UpdateOrder order in Enum.GetValues(typeof(UpdateOrder)))
             {
@@ -27,7 +28,7 @@ namespace MK.Entities
                 var go = new GameObject($"[{worldName}]");
                 this.Runner = go.AddComponent<WorldRunner>();
                 this.Runner.Initialize(this);
-                GameObject.DontDestroyOnLoad(go);
+                Object.DontDestroyOnLoad(go);
             }
             
 #if UNITY_EDITOR
