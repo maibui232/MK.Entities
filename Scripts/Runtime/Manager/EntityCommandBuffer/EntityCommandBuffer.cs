@@ -2,23 +2,24 @@ namespace MK.Entities
 {
     using System;
     using System.Collections.Generic;
+    using MK.Pool;
     using UnityEngine;
 
-    internal class EntityCommandBuffer : IDisposable
+    internal sealed class EntityCommandBuffer : IDisposable
     {
         private readonly List<ICommandBuffer> commandBuffers = new();
 
-        public ICommandBuffer DestroyEntity(Entity entity, Action<Entity> onDestroyEntity)
+        public ICommandBuffer DestroyEntity(Entity entity, IObjectPool<Entity, Entity.Param> objectPool, Action onDestroyed)
         {
-            var command = new DestroyCommandBuffer(entity, onDestroyEntity);
+            var command = new DestroyCommandBuffer(entity, objectPool, onDestroyed);
             this.commandBuffers.Add(command);
 
             return command;
         }
 
-        internal ICommandBuffer AddComponent(Entity entity, IComponent component)
+        internal ICommandBuffer AddComponent(Entity entity, IComponent component, Action onAddedComponent)
         {
-            var command = new AddCommandBuffer(entity, component);
+            var command = new AddCommandBuffer(entity, component, onAddedComponent);
             this.commandBuffers.Add(command);
 
             return command;
@@ -32,17 +33,9 @@ namespace MK.Entities
             return command;
         }
 
-        internal ICommandBuffer RemoveComponent(Entity entity, Type type)
+        internal ICommandBuffer RemoveComponent(Entity entity, Type type, Action onRemovedComponent)
         {
-            var command = new RemoveCommandBuffer(entity, type);
-            this.commandBuffers.Add(command);
-
-            return command;
-        }
-
-        internal ICommandBuffer RemoveComponent<TComponent>(Entity entity) where TComponent : IComponent
-        {
-            var command = new RemoveCommandBuffer(entity, typeof(TComponent));
+            var command = new RemoveCommandBuffer(entity, type, onRemovedComponent);
             this.commandBuffers.Add(command);
 
             return command;

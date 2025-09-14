@@ -4,6 +4,7 @@
   "references": [
     "MK.Factory",
     "MK.Kernel",
-    "MK.Pool"
+    "MK.Pool",
+    "MK.Extensions"
   ]
 }

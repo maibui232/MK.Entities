@@ -16,7 +16,7 @@ namespace MK.Entities
         private World(ISystemProvider systemProvider, string worldName = "World", bool autoUpdate = true)
         {
             this.systemProvider = systemProvider;
-            this.EntityManager  = new EntityManager(new EntityPoolableController());
+            this.EntityManager  = new EntityManager();
             
             foreach (UpdateOrder order in Enum.GetValues(typeof(UpdateOrder)))
             {

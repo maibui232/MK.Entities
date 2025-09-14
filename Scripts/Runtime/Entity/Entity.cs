@@ -4,20 +4,62 @@ namespace MK.Entities
     using System.Collections.Generic;
     using MK.Pool;
 
-    public sealed class Entity : IPoolable
+    public sealed class Entity : IPoolable<Entity.Param>, IEquatable<Entity>
     {
+#region ObjectPool
+
+        public sealed class Param
+        {
+            public int    Id   { get; }
+            public string Name { get; }
+
+            public Param(int id, string name)
+            {
+                this.Id   = id;
+                this.Name = name;
+            }
+        }
+
+        internal sealed class ObjectPool : ObjectPool<Entity, Param>
+        {
+            protected override Entity Create(Param param) => new();
+        }
+
+        void IPoolable<Param>.OnSpawned(Param param)
+        {
+            this.Id   = param.Id;
+            this.Name = param.Name;
+        }
+
+        void IRecyclable.OnRecycled()
+        {
+            this.Id   = -1;
+            this.Name = string.Empty;
+        }
+
+#endregion
+
+#region Fields
+
         private readonly Dictionary<Type, IComponent> typeToComponents = new();
 
-        internal int    Index { get; private set; }
-        internal string Name  { get; private set; }
+        internal int    Id   { get; private set; }
+        internal string Name { get; private set; }
 
-        internal IEnumerable<IComponent> Components => this.typeToComponents.Values;
+#endregion
 
-        internal void OnCreate(int index, string name)
+#region IEquatable
+
+        bool IEquatable<Entity>.Equals(Entity other)
         {
-            this.Index = index;
-            this.Name  = name;
+            return other != null && this.Id == other.Id;
         }
+
+#endregion
+
+#region Internal Methods
+
+        internal IReadOnlyDictionary<Type, IComponent> TypeToComponents => this.typeToComponents;
 
         internal void OnDestroy()
         {
@@ -81,15 +123,6 @@ namespace MK.Entities
             this.typeToComponents.Remove(type);
         }
 
-        void IPoolable.OnSpawn()
-        {
-        }
-
-        void IPoolable.OnRecycle()
-        {
-            this.typeToComponents.Clear();
-            this.Index = -1;
-            this.Name  = null;
-        }
+#endregion
     }
 }

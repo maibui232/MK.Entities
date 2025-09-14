@@ -8,33 +8,73 @@ namespace MK.Entities
 
     public sealed class EntityManager
     {
-        private readonly IPoolableController<Entity> entityPoolableController;
-        private readonly EntityCommandBuffer         ecb        = new();
-        private readonly List<ICollector>            collectors = new();
-
-        public EntityManager(IPoolableController<Entity> entityPoolableController)
-        {
-            this.entityPoolableController = entityPoolableController;
-        }
+        private readonly IObjectPool<Entity, Entity.Param>         entityObjectPool    = new Entity.ObjectPool();
+        private readonly IObjectPool<Archetype, IEnumerable<Type>> archetypeObjectPool = new Archetype.ObjectPool();
+        private readonly Dictionary<ArchetypeKey, Archetype>       keyToArchetype      = new();
+        private readonly EntityCommandBuffer                       ecb                 = new();
 
         public Entity CreateEntity()
         {
-            var index  = this.entityPoolableController.GetSpawned.Count();
-            var entity = this.entityPoolableController.Instantiate();
-            entity.OnCreate(index, $"Entity-{index}");
+            var index  = this.entityObjectPool.InstanceSpawned.Count;
+            var entity = this.entityObjectPool.Spawn(new Entity.Param(index, $"Entity-{index}"));
 
             return entity;
         }
+
+#region Query
+
+        private bool GetOrCreateArchetype(ArchetypeKey key, out Archetype archetype)
+        {
+            if (this.keyToArchetype.TryGetValue(key, out archetype)) return true;
+            this.keyToArchetype[key] = archetype = this.archetypeObjectPool.Spawn(key.Types);
+
+            return false;
+        }
+
+        private void OnAddedComponent(Entity entity, Type componentType)
+        {
+                
+        }
+
+        private void OnRemovedComponent(Entity entity, Type componentType)
+        {
+        }
+
+        private void OnDestroyEntity(Entity entity)
+        {
+        }
+
+        private Archetype Query(params Type[] types)
+        {
+            var key = new ArchetypeKey(types);
+            if (this.GetOrCreateArchetype(key, out var archetype))
+            {
+                return archetype;
+            }
+
+            // filter entity
+            var keyValuePairs = this.entityObjectPool.InstanceSpawned.Where(entity => types.All(type => entity.TypeToComponents.ContainsKey(type)));
+            foreach (var entity in keyValuePairs)
+            {
+                archetype.AddEntity(entity, entity.TypeToComponents.Values);
+            }
+
+            return archetype;
+        }
+
+        public Archetype Query<T>() where T : IComponent
+        {
+            return this.Query(typeof(T));
+        }
+#endregion
 
 #region Command Buffer
 
         internal void PlaybackECB()
         {
             this.ecb.Playback();
-            foreach (var collector in this.collectors)
-            {
-                collector.Collect(this.entityPoolableController.GetSpawned);
-            }
+
+            // implement all through archetype
         }
 
         public void Link(Entity entity, GameObject obj)
@@ -49,12 +89,12 @@ namespace MK.Entities
 
         public void AddComponent(Entity entity, IComponent component)
         {
-            this.ecb.AddComponent(entity, component);
+            this.ecb.AddComponent(entity, component, () => this.OnAddedComponent(entity, component.GetType()));
         }
 
         public void AddComponent<TComponent>(Entity entity, TComponent component) where TComponent : IComponent
         {
-            this.ecb.AddComponent(entity, component);
+            this.ecb.AddComponent(entity, component, () => this.OnAddedComponent(entity, component.GetType()));
         }
 
         public void SetComponent(Entity entity, IComponent component)
@@ -69,151 +109,17 @@ namespace MK.Entities
 
         public void RemoveComponent(Entity entity, Type type)
         {
-            this.ecb.RemoveComponent(entity, type);
+            this.ecb.RemoveComponent(entity, type, () => this.OnRemovedComponent(entity, type));
         }
 
         public void RemoveComponent<TComponent>(Entity entity) where TComponent : IComponent
         {
-            this.ecb.RemoveComponent<TComponent>(entity);
+            this.ecb.RemoveComponent(entity, typeof(TComponent), () => this.OnRemovedComponent(entity, typeof(TComponent)));
         }
 
-#endregion
-
-#region Collector
-
-        public Collector<T> RequireAll<T>()
-            where T : IComponent
+        public void DestroyEntity(Entity entity)
         {
-            var collector = new Collector<T>();
-            this.collectors.Add(collector);
-
-            return collector;
-        }
-
-        public Collector<T1, T2> RequireAll<T1, T2>()
-            where T1 : IComponent
-            where T2 : IComponent
-        {
-            var collector = new Collector<T1, T2>();
-            this.collectors.Add(collector);
-
-            return collector;
-        }
-
-        public Collector<T1, T2, T3> RequireAll<T1, T2, T3>()
-            where T1 : IComponent
-            where T2 : IComponent
-            where T3 : IComponent
-        {
-            var collector = new Collector<T1, T2, T3>();
-            this.collectors.Add(collector);
-
-            return collector;
-        }
-
-        public Collector<T1, T2, T3, T4> RequireAll<T1, T2, T3, T4>()
-            where T1 : IComponent
-            where T2 : IComponent
-            where T3 : IComponent
-            where T4 : IComponent
-        {
-            var collector = new Collector<T1, T2, T3, T4>();
-            this.collectors.Add(collector);
-
-            return collector;
-        }
-
-        public Collector<T1, T2, T3, T4, T5> RequireAll<T1, T2, T3, T4, T5>()
-            where T1 : IComponent
-            where T2 : IComponent
-            where T3 : IComponent
-            where T4 : IComponent
-            where T5 : IComponent
-        {
-            var collector = new Collector<T1, T2, T3, T4, T5>();
-            this.collectors.Add(collector);
-
-            return collector;
-        }
-
-        public Collector<T1, T2, T3, T4, T5, T6> RequireAll<T1, T2, T3, T4, T5, T6>()
-            where T1 : IComponent
-            where T2 : IComponent
-            where T3 : IComponent
-            where T4 : IComponent
-            where T5 : IComponent
-            where T6 : IComponent
-        {
-            var collector = new Collector<T1, T2, T3, T4, T5, T6>();
-            this.collectors.Add(collector);
-
-            return collector;
-        }
-
-        public Collector<T1, T2, T3, T4, T5, T6, T7> RequireAll<T1, T2, T3, T4, T5, T6, T7>()
-            where T1 : IComponent
-            where T2 : IComponent
-            where T3 : IComponent
-            where T4 : IComponent
-            where T5 : IComponent
-            where T6 : IComponent
-            where T7 : IComponent
-        {
-            var collector = new Collector<T1, T2, T3, T4, T5, T6, T7>();
-            this.collectors.Add(collector);
-
-            return collector;
-        }
-
-        public Collector<T1, T2, T3, T4, T5, T6, T7, T8> RequireAll<T1, T2, T3, T4, T5, T6, T7, T8>()
-            where T1 : IComponent
-            where T2 : IComponent
-            where T3 : IComponent
-            where T4 : IComponent
-            where T5 : IComponent
-            where T6 : IComponent
-            where T7 : IComponent
-            where T8 : IComponent
-        {
-            var collector = new Collector<T1, T2, T3, T4, T5, T6, T7, T8>();
-            this.collectors.Add(collector);
-
-            return collector;
-        }
-
-        public Collector<T1, T2, T3, T4, T5, T6, T7, T8, T9> RequireAll<T1, T2, T3, T4, T5, T6, T7, T8, T9>()
-            where T1 : IComponent
-            where T2 : IComponent
-            where T3 : IComponent
-            where T4 : IComponent
-            where T5 : IComponent
-            where T6 : IComponent
-            where T7 : IComponent
-            where T8 : IComponent
-            where T9 : IComponent
-        {
-            var collector = new Collector<T1, T2, T3, T4, T5, T6, T7, T8, T9>();
-            this.collectors.Add(collector);
-
-            return collector;
-        }
-
-        public Collector<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> RequireAll<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>()
-            where T1 : IComponent
-            where T2 : IComponent
-            where T3 : IComponent
-            where T4 : IComponent
-            where T5 : IComponent
-            where T6 : IComponent
-            where T7 : IComponent
-            where T8 : IComponent
-            where T9 : IComponent
-            where T10 : IComponent
-        {
-            var collector = new Collector<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>();
-            this.collectors.Add(collector);
-
-            return collector;
+            this.ecb.DestroyEntity(entity, this.entityObjectPool, () => this.OnDestroyEntity(entity));
         }
 
 #endregion
