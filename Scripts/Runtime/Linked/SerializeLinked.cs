@@ -4,16 +4,7 @@ namespace MK.Entities
     {
         IComponent ISerializeLinked.CreateComponent()
         {
-            ILinked linked = this;
-            if (linked.Component != null)
-            {
-                return linked.Component;
-            }
-
-            var component = this.CreateComponent();
-            ((ILinked)this).Component = component;
-
-            return component;
+            return this.CreateComponent();
         }
 
         protected abstract TComponent CreateComponent();

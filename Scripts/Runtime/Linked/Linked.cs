@@ -5,32 +5,33 @@ namespace MK.Entities
 
     public abstract class Linked<TComponent> : MonoBehaviour, ILinked where TComponent : struct, IComponent
     {
-        private bool       isLinked;
-        private GameObject linkedObject;
+        private IComponent cacheComponent;
+        private Type       componentType;
 
-        IComponent ILinked.Component { get; set; }
-        bool ILinked.      IsLinked  => this.isLinked;
+        IComponent ILinked.Component     => this.cacheComponent;
+        bool ILinked.      IsLinked      => this.cacheComponent != null;
+        Type ILinked.      ComponentType => typeof(TComponent);
 
         void ILinked.OnLinked(IComponent component)
         {
-            if (this.isLinked)
+            if (this.cacheComponent != null)
             {
                 throw new ArgumentException($"Could not link component {typeof(TComponent).FullName} again!");
             }
 
-            this.isLinked = true;
+            this.cacheComponent = component;
             this.OnLinked((TComponent)component);
         }
 
-        void ILinked.OnUnlinked(IComponent component)
+        void ILinked.OnUnlinked()
         {
-            if (!this.isLinked)
+            if (this.cacheComponent == null)
             {
                 throw new ArgumentException($"Could not unlink component {typeof(TComponent).FullName}!");
             }
 
-            this.isLinked = false;
-            this.OnUnlinked((TComponent)component);
+            this.OnUnlinked((TComponent)this.cacheComponent);
+            this.cacheComponent = null;
         }
 
         protected abstract void OnLinked(TComponent component);

@@ -4,18 +4,21 @@ namespace MK.Entities
 
     public readonly struct Entity : IEquatable<Entity>
     {
-        internal readonly int    Id;
-        internal readonly string Name;
+        internal readonly int Id;
 
-        public Entity(int id, string name)
+        public Entity(int id)
         {
             this.Id = id;
-            this.Name = name;
         }
 
         bool IEquatable<Entity>.Equals(Entity other)
         {
-            return this.Id == other.Id && this.Name.Equals(other.Name);
+            return this.Id == other.Id;
+        }
+
+        public override string ToString()
+        {
+            return $"Entity-{this.Id}";
         }
     }
 }

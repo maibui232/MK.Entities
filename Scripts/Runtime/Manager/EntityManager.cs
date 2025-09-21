@@ -2,12 +2,17 @@ namespace MK.Entities
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using UnityEngine;
 
     public sealed class EntityManager
     {
-        private readonly Dictionary<ArchetypeKey, Archetype> keyToArchetype = new();
-        private readonly List<Command>                       commands       = new();
+        private readonly Dictionary<ArchetypeKey, Archetype> keyToArchetype          = new();
+        private readonly Dictionary<Entity, Archetype>       entityToArchetypeLookup = new();
+        private readonly List<Command>                       commands                = new();
+        private readonly Dictionary<Entity, GameObject>      entityToViewLinked      = new();
+
+        private int entityCreationCount;
 
 #region Query
 
@@ -30,7 +35,7 @@ namespace MK.Entities
                 switch (command.CommandType)
                 {
                     case CommandType.Create:
-                        this.PlaybackCreate();
+                        this.PlaybackCreate(command.InitialComponents);
 
                         break;
                     case CommandType.Destroy:
@@ -42,7 +47,7 @@ namespace MK.Entities
 
                         break;
                     case CommandType.Remove:
-                        this.PlaybackRemove(command.Entity, command.CommandType);
+                        this.PlaybackRemove(command.Entity, command.ComponentType);
 
                         break;
                     case CommandType.Set:
@@ -65,39 +70,135 @@ namespace MK.Entities
             this.commands.Clear();
         }
 
-        private void PlaybackCreate()
+        private void PlaybackCreate(IComponent[] components)
         {
-            throw new NotImplementedException();
+            if (components.Length == 0)
+            {
+                throw new InvalidOperationException($"Cannot create entity without any components.");
+            }
+
+            var entity       = new Entity(this.entityCreationCount++);
+            var archetypeKey = new ArchetypeKey(components.Select(component => component.GetType()).ToArray());
+            if (!this.keyToArchetype.TryGetValue(archetypeKey, out var archetype))
+            {
+                this.keyToArchetype[archetypeKey] = archetype = new Archetype(components.Select(component => component.GetType()).ToArray());
+            }
+
+            archetype.AddEntity(entity, components);
+            this.entityToArchetypeLookup[entity] = archetype;
         }
 
-        private void PlaybackDestroy(Entity commandEntity)
+        private void PlaybackDestroy(Entity entity)
         {
-            throw new NotImplementedException();
+            if (!this.entityToArchetypeLookup.TryGetValue(entity, out var archetype))
+            {
+                throw new InvalidOperationException($"Cannot destroy entity: {entity} because it doesn't exist in any archetype.");
+            }
+
+            archetype.RemoveEntity(entity);
+            this.entityToArchetypeLookup.Remove(entity);
         }
 
-        private void PlaybackAdd(Entity commandEntity, IComponent commandComponent)
+        private void PlaybackAdd(Entity entity, IComponent component)
         {
-            throw new NotImplementedException();
+            if (!this.entityToArchetypeLookup.TryGetValue(entity, out var oldArchetype))
+            {
+                throw new InvalidOperationException($"Cannot add entity: {entity} because it doesn't exist in any archetype.");
+            }
+
+            var components = oldArchetype.GetComponents(entity).ToList();
+            components.Add(component);
+            oldArchetype.RemoveEntity(entity);
+
+            var newArchetype = this.GetOrCreateArchetype(new ArchetypeKey(components.Select(comp => comp.GetType()).ToArray()));
+            newArchetype.AddEntity(entity, components);
+            this.entityToArchetypeLookup[entity] = newArchetype;
         }
 
-        private void PlaybackRemove(Entity commandEntity, CommandType commandCommandType)
+        private void PlaybackRemove(Entity entity, Type componentType)
         {
-            throw new NotImplementedException();
+            if (!this.entityToArchetypeLookup.TryGetValue(entity, out var oldArchetype))
+            {
+                throw new InvalidOperationException($"Cannot remove entity: {entity} because it doesn't exist in any archetype.");
+            }
+
+            var components       = oldArchetype.GetComponents(entity).ToList();
+            var removedComponent = oldArchetype.GetComponent(entity, componentType);
+            components.Remove(removedComponent);
+            oldArchetype.RemoveEntity(entity);
+
+            var newArchetype = this.GetOrCreateArchetype(new ArchetypeKey(components.Select(comp => comp.GetType()).ToArray()));
+            newArchetype.AddEntity(entity, components);
+            this.entityToArchetypeLookup[entity] = newArchetype;
         }
 
-        private void PlaybackSet(Entity commandEntity, IComponent commandComponent)
+        private void PlaybackSet(Entity entity, IComponent component)
         {
-            throw new NotImplementedException();
+            if (!this.entityToArchetypeLookup.TryGetValue(entity, out var archetype))
+            {
+                throw new InvalidOperationException($"Cannot set entity: {entity} because it doesn't exist in any archetype.");
+            }
+
+            archetype.SetComponent(entity, component);
         }
 
-        private void PlaybackLink(Entity commandEntity, GameObject commandView)
+        private void PlaybackLink(Entity entity, GameObject view)
         {
-            throw new NotImplementedException();
+            if (!this.entityToArchetypeLookup.ContainsKey(entity))
+            {
+                throw new InvalidOperationException($"Cannot link entity: {entity} because it doesn't exist in any archetype.");
+            }
+
+            if (this.entityToViewLinked.ContainsKey(entity))
+            {
+                throw new InvalidOperationException($"Cannot link entity: {entity} because it is already linked.");
+            }
+
+            var componentTypeToLinked = view.GetComponents<ILinked>().ToDictionary(linked => linked.ComponentType, linked => linked);
+            foreach (var (_, linked) in componentTypeToLinked)
+            {
+                if (linked is ISerializeLinked serializeLinked)
+                {
+                    this.PlaybackAdd(entity, serializeLinked.CreateComponent());
+                }
+            }
+
+            if (!this.entityToArchetypeLookup.TryGetValue(entity, out var archetype))
+            {
+                throw new InvalidOperationException($"Cannot find to link entity: {entity} because it doesn't exist in any archetype.");
+            }
+
+            var components = archetype.GetComponents(entity).ToList();
+            foreach (var component in components)
+            {
+                if (componentTypeToLinked.TryGetValue(component.GetType(), out var linked))
+                {
+                    linked.OnLinked(component);
+                }
+            }
+
+            this.entityToViewLinked[entity] = view;
         }
 
-        private void PlaybackUnlink(Entity commandEntity)
+        private void PlaybackUnlink(Entity entity)
         {
-            throw new NotImplementedException();
+            if (!this.entityToArchetypeLookup.ContainsKey(entity))
+            {
+                throw new InvalidOperationException($"Cannot unlink entity: {entity} because it doesn't exist in any archetype.");
+            }
+
+            if (!this.entityToViewLinked.TryGetValue(entity, out var view))
+            {
+                throw new InvalidOperationException($"Cannot unlink entity: {entity} because it doesn't exist in any view.");
+            }
+
+            var links = view.GetComponents<ILinked>();
+            foreach (var linked in links)
+            {
+                linked.OnUnlinked();
+            }
+
+            this.entityToViewLinked.Remove(entity);
         }
 
 #endregion
