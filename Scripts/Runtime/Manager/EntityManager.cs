@@ -2,20 +2,21 @@ namespace MK.Entities
 {
     using System;
     using System.Collections.Generic;
+    using UnityEngine;
 
     public sealed class EntityManager
     {
-        private readonly Dictionary<ArchetypeKey, Archetype> keyToArchetype      = new();
-        private readonly EntityCommandBuffer                 entityCommandBuffer = new();
+        private readonly Dictionary<ArchetypeKey, Archetype> keyToArchetype = new();
+        private readonly List<Command>                       commands       = new();
 
 #region Query
 
-        private bool GetOrCreateArchetype(ArchetypeKey key, out Archetype archetype)
+        private Archetype GetOrCreateArchetype(ArchetypeKey key)
         {
-            if (this.keyToArchetype.TryGetValue(key, out archetype)) return true;
+            if (this.keyToArchetype.TryGetValue(key, out var archetype)) return archetype;
             this.keyToArchetype[key] = archetype = new Archetype(key.ComponentTypes);
 
-            return false;
+            return archetype;
         }
 
 #endregion
@@ -24,54 +25,79 @@ namespace MK.Entities
 
         internal void PlaybackECB()
         {
-            foreach (var command in this.entityCommandBuffer.Commands)
+            foreach (var command in this.commands)
             {
                 switch (command.CommandType)
                 {
-                    case Command.Type.Create:
-                        this.PlaybackCreate(command);
+                    case CommandType.Create:
+                        this.PlaybackCreate();
 
                         break;
-                    case Command.Type.Destroy:
-                        this.PlaybackDestroy(command);
+                    case CommandType.Destroy:
+                        this.PlaybackDestroy(command.Entity);
 
                         break;
-                    case Command.Type.Add:
-                        this.PlaybackAdd(command);
+                    case CommandType.Add:
+                        this.PlaybackAdd(command.Entity, command.NewComponent);
 
                         break;
-                    case Command.Type.Remove:
-                        this.PlaybackRemove(command);
+                    case CommandType.Remove:
+                        this.PlaybackRemove(command.Entity, command.CommandType);
 
                         break;
-                    case Command.Type.Set:
-                        this.PlaybackSet(command);
+                    case CommandType.Set:
+                        this.PlaybackSet(command.Entity, command.NewComponent);
+
+                        break;
+                    case CommandType.Link:
+                        this.PlaybackLink(command.Entity, command.View);
+
+                        break;
+                    case CommandType.Unlink:
+                        this.PlaybackUnlink(command.Entity);
 
                         break;
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
             }
+
+            this.commands.Clear();
         }
 
-        private void PlaybackCreate(Command command)
+        private void PlaybackCreate()
         {
+            throw new NotImplementedException();
         }
 
-        private void PlaybackDestroy(Command command)
+        private void PlaybackDestroy(Entity commandEntity)
         {
+            throw new NotImplementedException();
         }
 
-        private void PlaybackAdd(Command command)
+        private void PlaybackAdd(Entity commandEntity, IComponent commandComponent)
         {
+            throw new NotImplementedException();
         }
 
-        private void PlaybackRemove(Command command)
+        private void PlaybackRemove(Entity commandEntity, CommandType commandCommandType)
         {
+            throw new NotImplementedException();
         }
 
-        private void PlaybackSet(Command command)
+        private void PlaybackSet(Entity commandEntity, IComponent commandComponent)
         {
+            throw new NotImplementedException();
+        }
+
+        private void PlaybackLink(Entity commandEntity, GameObject commandView)
+        {
+            throw new NotImplementedException();
+        }
+
+        private void PlaybackUnlink(Entity commandEntity)
+        {
+            throw new NotImplementedException();
         }
 
 #endregion
@@ -80,42 +106,39 @@ namespace MK.Entities
 
         public void CreateEntity(params IComponent[] components)
         {
-            this.entityCommandBuffer.Create(components);
+            this.commands.Add(Command.Create());
         }
 
         public void DestroyEntity(Entity entity)
         {
-            this.entityCommandBuffer.Destroy(entity);
+            this.commands.Add(Command.Destroy(entity));
         }
 
         public void AddComponent(Entity entity, IComponent component)
         {
-            this.entityCommandBuffer.Add(entity, component);
+            this.commands.Add(Command.Add(entity, component));
         }
 
-        public void AddComponent<TComponent>(Entity entity, TComponent component) where TComponent : struct, IComponent
+        public void RemoveComponent(Entity entity, Type componentType)
         {
-            this.entityCommandBuffer.Add(entity, component);
+            this.commands.Add(Command.Remove(entity, componentType));
         }
 
-        public void RemoveComponent(Entity entity, Type type)
-        {
-            this.entityCommandBuffer.Remove(entity, type);
-        }
-
-        public void RemoveComponent<TComponent>(Entity entity) where TComponent : struct, IComponent
-        {
-            this.entityCommandBuffer.Remove(entity, typeof(TComponent));
-        }
+        public void RemoveComponent<T>(Entity entity) where T : struct, IComponent => this.RemoveComponent(entity, typeof(T));
 
         public void SetComponent(Entity entity, IComponent component)
         {
-            this.entityCommandBuffer.Set(entity, component);
+            this.commands.Add(Command.Set(entity, component));
         }
 
-        public void SetComponent<TComponent>(Entity entity, TComponent component) where TComponent : struct, IComponent
+        public void LinkEntity(Entity entity, GameObject gameObject)
         {
-            this.entityCommandBuffer.Set(entity, component);
+            this.commands.Add(Command.Link(entity, gameObject));
+        }
+
+        public void UnlinkEntity(Entity entity)
+        {
+            this.commands.Add(Command.Unlink(entity));
         }
 
 #endregion
