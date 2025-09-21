@@ -2,71 +2,46 @@ namespace MK.Entities
 {
     using System;
     using System.Collections.Generic;
-    using MK.Pool;
-    using UnityEngine;
+    using System.Linq;
 
-    internal sealed class EntityCommandBuffer : IDisposable
+    internal sealed class EntityCommandBuffer
     {
-        private readonly List<ICommandBuffer> commandBuffers = new();
+        private readonly List<Command> commands = new();
 
-        public ICommandBuffer DestroyEntity(Entity entity, IObjectPool<Entity, Entity.Param> objectPool, Action onDestroyed)
+        internal IReadOnlyCollection<Command> Commands => this.commands;
+
+        internal void ClearBuffer()
         {
-            var command = new DestroyCommandBuffer(entity, objectPool, onDestroyed);
-            this.commandBuffers.Add(command);
-
-            return command;
+            this.commands.Clear();
         }
 
-        internal ICommandBuffer AddComponent(Entity entity, IComponent component, Action onAddedComponent)
-        {
-            var command = new AddCommandBuffer(entity, component, onAddedComponent);
-            this.commandBuffers.Add(command);
+#region Commands
 
-            return command;
+        internal void Create(params IComponent[] components)
+        {
+            this.commands.AddRange(components.Select(component => new Command(Command.Type.Create, component: component)));
         }
 
-        internal ICommandBuffer SetComponent(Entity entity, IComponent component)
+        internal void Destroy(Entity entity)
         {
-            var command = new SetCommandBuffer(entity, component);
-            this.commandBuffers.Add(command);
-
-            return command;
+            this.commands.Add(new Command(Command.Type.Destroy, entity));
         }
 
-        internal ICommandBuffer RemoveComponent(Entity entity, Type type, Action onRemovedComponent)
+        internal void Add(Entity entity, params IComponent[] components)
         {
-            var command = new RemoveCommandBuffer(entity, type, onRemovedComponent);
-            this.commandBuffers.Add(command);
-
-            return command;
+            this.commands.AddRange(components.Select(component => new Command(Command.Type.Add, entity, component)));
         }
 
-        internal ICommandBuffer Link(Entity entity, GameObject gameObject)
+        internal void Remove(Entity entity, params Type[] types)
         {
-            var command = new LinkCommandBuffer(entity, gameObject);
-            this.commandBuffers.Add(command);
-
-            return command;
+            this.commands.AddRange(types.Select(component => new Command(Command.Type.Remove, entity, componentType: component)));
         }
 
-        internal ICommandBuffer Unlink(GameObject gameObject)
+        internal void Set(Entity entity, params IComponent[] components)
         {
-            var command = new UnlinkCommandBuffer(gameObject);
-            this.commandBuffers.Add(command);
-
-            return command;
+            this.commands.AddRange(components.Select(component => new Command(Command.Type.Set, entity, component)));
         }
 
-        internal void Playback()
-        {
-            foreach (var commandBuffer in this.commandBuffers)
-            {
-                commandBuffer.Execute();
-            }
-
-            this.commandBuffers.Clear();
-        }
-
-        void IDisposable.Dispose() { this.commandBuffers.Clear(); }
+#endregion
     }
 }

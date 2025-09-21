@@ -72,12 +72,12 @@ namespace MK.Entities.Editor
                 button.RegisterCallback<MouseLeaveEvent>(evt => button.RemoveFromClassList("hover"));
                 
                 // Update selection state
-                if (this.selectedEntity == entity)
+                // if (this.selectedEntity == entity)// todo fix
                 {
                     button.AddToClassList("selected");
                     this.entityListView.selectedIndex = itemIndex;
                 }
-                else
+                // else// todo fix
                 {
                     button.RemoveFromClassList("selected");
                 }
@@ -119,12 +119,12 @@ namespace MK.Entities.Editor
             this.entityListView.style.display = this.currentEntities.Count > 0 ? DisplayStyle.Flex : DisplayStyle.None;
 
             // Update components panel
-            if (this.selectedEntity == null)
+            // if (this.selectedEntity == null) // todo fix
             {
                 this.componentsPanel.Clear();
                 this.componentsPanel.Add(this.noEntitySelectedLabel);
             }
-            else
+            // else // todo fix
             {
                 this.componentsPanel.Clear();
                 var componentsContainer = new VisualElement();

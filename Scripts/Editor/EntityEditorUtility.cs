@@ -45,7 +45,7 @@ namespace MK.Entities.Editor
 
         public static string GetEntityName(Entity entity)
         {
-            if (entity == null) return "Null Entity";
+            // if (entity == null) return "Null Entity";// todo fix
 
             return NameProperty?.GetValue(entity) as string ?? "Unknown";
         }
@@ -56,7 +56,7 @@ namespace MK.Entities.Editor
 
         public static IEnumerable<object> GetComponents(Entity entity)
         {
-            if (entity == null) return Enumerable.Empty<object>();
+            // if (entity == null) return Enumerable.Empty<object>(); // todo fix
 
             return ComponentsField?.GetValue(entity) is not Dictionary<Type, IComponent> components
                        ? Enumerable.Empty<object>()

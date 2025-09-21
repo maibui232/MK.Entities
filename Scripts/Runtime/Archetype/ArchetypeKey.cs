@@ -2,24 +2,39 @@ namespace MK.Entities
 {
     using System;
     using System.Collections.Generic;
-    using MK.Extensions;
-    using Enumerable = System.Linq.Enumerable;
+    using System.Linq;
 
-    internal sealed class ArchetypeKey : IEquatable<ArchetypeKey>
+    internal readonly struct ArchetypeKey : IEquatable<ArchetypeKey>
     {
-        private readonly Type[] types;
+        private readonly int[]                     componentIds;
+        public readonly  IReadOnlyCollection<Type> ComponentTypes;
 
-        internal IReadOnlyCollection<Type> Types => this.types;
-
-        public ArchetypeKey(params Type[] types)
+        public ArchetypeKey(IReadOnlyCollection<Type> types)
         {
-            this.types = types.Sort();
+            this.ComponentTypes = types;
+            this.componentIds   = types.Select(ArchetypeKeyExtensions.ComponentId).ToArray();
+            Array.Sort(this.componentIds);
+        }
+
+        private static class ArchetypeKeyExtensions
+        {
+            private static readonly Dictionary<Type, int> TypeToId = new();
+
+            public static int ComponentId(Type componentType)
+            {
+                if (!TypeToId.TryGetValue(componentType, out var id))
+                {
+                    TypeToId[componentType] = id = TypeToId.Count;
+                }
+
+                return id;
+            }
         }
 
         bool IEquatable<ArchetypeKey>.Equals(ArchetypeKey other)
         {
-            if (other == null || this.types.Length != other.types.Length) return false;
-            return !Enumerable.Any(Enumerable.Where(this.types, (t, i) => t != other.types[i]));
+            if (this.componentIds.Length != other.componentIds.Length) return false;
+            return !this.componentIds.Where((t, i) => t != other.componentIds[i]).Any();
         }
     }
 }

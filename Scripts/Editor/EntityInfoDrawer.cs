@@ -21,7 +21,7 @@ namespace MK.Entities.Editor
 
         public void DrawEntityComponents(Entity entity, VisualElement container)
         {
-            if (entity == null) return;
+            // if (entity == null) return;// todo fix
 
             var components = EntityEditorUtility.GetComponents(entity).ToArray();
             if (!components.Any())
